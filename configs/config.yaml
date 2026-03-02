@@ -1,0 +1,262 @@
+# configs/config.yaml
+project:
+  name: "autoscaling-analysis"
+  root: "."
+
+paths:
+  raw_logs_dir: "data/raw"
+  raw_train: "data/raw/train.txt"
+  raw_test: "data/raw/test.txt"
+  interim_dir: "data/interim"
+  processed_dir: "data/processed"
+  outputs:
+    eda: "outputs/02_eda"
+    features: "outputs/03_features"
+    models: "outputs/04_models"
+    predictions: "outputs/04_models/predictions"
+    scaling: "outputs/05_scaling"
+  artifacts:
+    models: "artifacts/models"
+    predictions: "artifacts/predictions"
+    metrics: "artifacts/metrics"
+    scaling: "artifacts/scaling"
+  reports:
+    eda: "reports/eda"
+    figures: "reports/figures"
+  scripts: "scripts"
+  src: "src/autoscaling_analysis"
+
+data:
+  save_train_dir: "data/train"
+  save_test_dir: "data/test"
+  out_02: "outputs/02_eda"
+  out_03: "outputs/03_features"
+  out_04: "outputs/04_models"
+  out_04p: "outputs/04_models/predictions"
+  out_05: "outputs/05_scaling"
+
+env:
+  chunk_size_lines: 300000
+  unknown_gap_min_hours: 12
+  main_freq_key: "5m"
+  timezone: "local"   # use tz-aware where available; scripts normalize tz as needed
+
+time:
+  time_col_raw: "timestamp"
+  time_col_bucket: "bucket_start"
+  dt_format: "%d/%b/%Y:%H:%M:%S %z"
+
+storm:
+  # use ISO 8601 with timezone where appropriate
+  start: "1995-08-01T14:52:01-04:00"
+  end:   "1995-08-03T04:36:13-04:00"
+
+tags:
+  - "1m"
+  - "5m"
+  - "15m"
+
+feature_engineering:
+  lag_days: [1, 2, 3, 4, 5, 6, 7]
+  roll_windows: ["1h", "6h", "1d"]
+  roll_use_std: true
+  use_cyclic: true
+  horizon_steps: 1
+  keep_raw_extra:
+    - "unique_hosts"
+    - "err_4xx"
+    - "err_5xx"
+    - "error_rate"
+    - "is_missing_bucket"
+    - "is_gap_storm"
+    - "is_gap_unknown"
+  require_cols:
+    - "bucket_start"
+    - "hits"
+    - "bytes_sum"
+    - "is_gap"
+  fill_cols:
+    - "hits"
+    - "bytes_sum"
+    - "avg_bytes_per_req"
+    - "err_4xx"
+    - "err_5xx"
+    - "error_rate"
+    - "unique_hosts"
+
+ingest:
+  log_regex: '^(?P<host>\\S+)\\s+\\S+\\s+\\S+\\s+\\[(?P<ts>[^\\]]+)\\]\\s+"(?P<request>[^"]*)"\\s+(?P<status>\\d{3})\\s+(?P<bytes>\\S+)\\s*$'
+  req_regex: '^(?P<method>[A-Z]+)\\s+(?P<url>\\S+)\\s+(?P<version>HTTP/\\d\\.\\d)$'
+
+modeling:
+  targets: ["hits", "bytes_sum"]
+  xgb_params:
+    booster: "gbtree"
+    n_estimators: 5000
+    early_stopping_rounds: 50
+    objective: "reg:squarederror"
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.9
+    colsample_bytree: 0.9
+    reg_lambda: 1.0
+    random_state: 42
+  cv_splits: 5
+  cv_test_days: 2
+  cv_gap_steps: 1
+  use_log_for:
+    - "bytes_sum"   # apply log1p on bytes_sum targets
+
+metrics:
+  metrics_path: "outputs/04_models/metrics_forecast.csv"
+  write_header: true
+
+scaling:
+  min_instances: 2
+  max_instances: 50
+  cost_per_instance_per_hour: 0.05
+
+  # window minutes
+  window_minutes:
+    "1m": 1
+    "5m": 5
+    "15m": 15
+
+  # metric-aware safety buffer (fraction)
+  safety_buffer_by_metric:
+    hits: 0.3
+    bytes_sum: 0.3
+
+  # capacity per instance (expressed per metric → per window)
+  capacity_per_instance:
+    hits:
+      "1m": 20
+      "5m": 100
+      "15m": 350
+    bytes_sum:
+      "1m": 350000
+      "5m": 1200000
+      "15m": 3500000
+
+  # step limits per window (max instances change per decision)
+  max_step_change_by_window:
+    "1m": 6
+    "5m": 10
+    "15m": 15
+
+  # hysteresis config per window
+  hysteresis_by_window:
+    "1m":
+      high: 2
+      low: 6
+      in_margin: 0.18
+    "5m":
+      high: 1
+      low: 4
+      in_margin: 0.15
+    "15m":
+      high: 1
+      low: 2
+      in_margin: 0.12
+
+  # predictive deadband (fraction) — used to avoid reacting to small forecast changes
+  predictive_deadband_by_window:
+    "1m": 0.5
+    "5m": 0.5
+    "15m": 0.5
+
+  # cooldown in minutes (base for normal, spike for more aggressive cases)
+  cooldown_minutes:
+    base: 8
+    spike: 15
+
+  # provisioning (warmup windows, min uptime windows)
+  provisioning_by_window:
+    "1m":
+      warmup_windows: 1
+      min_uptime_windows: 6
+    "5m":
+      warmup_windows: 1
+      min_uptime_windows: 4
+    "15m":
+      warmup_windows: 0
+      min_uptime_windows: 2
+
+  # reactive (rescue) knobs
+  reactive:
+    enabled: true
+    overload_scale_out_immediate: true
+    rescue_extra_instances: 3
+    queue_low_fraction: 0.05
+    queue_high_multiplier: 4.0
+
+  # SLO / latency model (simple)
+  slo:
+    base_latency_ms: 80.0
+    alpha_latency_per_unit_queue: 0.15
+    p95_latency_target_ms: 300.0
+
+  # anomaly detection (MAD-based)
+  anomaly:
+    enabled: true
+    method: "mad"
+    lookback_hours: 2
+    mad_k: 6.0
+    min_points: 10
+    max_flag_rate: 0.30
+
+  # DDoS guard mode
+  ddos_mode:
+    enabled: true
+    force_scale_out_step_by_window:
+      "1m": 6
+      "5m": 10
+      "15m": 12
+    max_instances_during_ddos: 50
+
+  # predictive tuning defaults (example tuned for "realistic" run)
+  tuning:
+    # these values may be adjusted by scripts before running sim
+    tuning_profile: "default"
+    adjustments:
+      "5m":
+        hysteresis:
+          high: 2
+          low: 4
+          in_margin: 0.18
+        cooldown_minutes: 15
+        max_step_change: 4
+        provisioning:
+          warmup_windows: 1
+          min_uptime_windows: 4
+
+simulation:
+  test_range:
+    test_start: "1995-08-23T00:00:00"
+    test_end:   "1995-09-01T00:00:00"   # exclusive
+  train_cutoff: "1995-08-23T00:00:00"   # exclusive upper bound for train baseline
+  default_metric: "hits"
+  default_window: "5m"
+  default_model_tag: "xgb"
+
+streamlit:
+  app_file: "streamlit_app.py"
+  default_test_range:
+    start: "1995-08-23"
+    end:   "1995-09-01"
+
+logging:
+  level: "INFO"
+  console: true
+  file: "logs/pipeline.log"
+
+tests:
+  - "tests/test_parse_regex.py"
+  - "tests/test_capacity_key_normalize.py"
+  - "tests/test_required_instances.py"
+  - "tests/test_feature_leakage.py"
+
+# Metadata / notes:
+# - capacity_per_instance is organized as metric -> window -> value (integers).
+# - Scripts should normalize timezone of all timestamp columns to tz-naive before merges.
+# - Use this config as single source of truth; do not hardcode values in scripts.
