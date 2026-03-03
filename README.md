@@ -83,7 +83,7 @@ Mô hình hồi quy cây quyết định, sử dụng để dự báo tải củ
 3. Rolling-window Validation: Thực hiện kiểm tra mô hình theo cửa sổ trượt để mô phỏng tình huống thực tế khi hệ thống phải dự báo theo từng thời điểm.
 
 ### Cấu trúc thư mục
-```plain text
+ ```text
 autoscaling-analysis/
 ├─ README.md
 ├─ LICENSE
@@ -165,7 +165,7 @@ autoscaling-analysis/
    ├─ test_feature_leakage.py
    ├─ test_required_instances.py
    └─ test_parse_regex.py
-
+```
 ## 4. Đánh giá
 
 ### Metrics:
@@ -244,3 +244,4 @@ autoscaling-analysis/
 
 - **Tác giả**: Vu Manh Hiep
 - **License**: MIT
+
