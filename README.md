@@ -25,7 +25,7 @@
   - **Missing values:** Loại bỏ các dòng dữ liệu không có thông tin hoặc có lỗi.
   - **Outliers:** Phát hiện và loại bỏ các giá trị bất thường có thể gây ảnh hưởng đến mô hình.
   - **Normalization:** Chuẩn hóa thời gian và chuyển đổi dữ liệu dạng chuỗi thành dạng số để mô hình có thể sử dụng.
-  - **Feature Engineering:** Tạo các chỉ số như tổng số lượt truy cập, tổng dung lượng trả về, tỷ lệ lỗi (error rate), và phát hiện các spikes.
+  - **Feature Engineering:** Tạo các đặc trưng mới để chuẩn bị cho việc phân tích và dự báo.
 
 ## 3. Mô hình & Kiến trúc
 
@@ -38,6 +38,7 @@
   4. **Model training:** Huấn luyện các mô hình dự báo sử dụng XGBoost và Seasonal Naive.
   5. **Scaling simulation:** Mô phỏng các chính sách autoscaling và tính toán các chỉ số hiệu suất (chi phí, SLA vi phạm, v.v.).
   6. **API Deployment:** Cung cấp API cho các dự báo và điều chỉnh tài nguyên.
+  7. **Demo UI:** Demo bằng dasboard xây dựng bằng Streamlit với biểu đồ tải, dự báo, đề xuất scale events.
   
   **Tổng quan luồng công việc:**
 
