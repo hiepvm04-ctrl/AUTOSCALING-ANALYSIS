@@ -38,7 +38,7 @@
   4. **Model training:** Huấn luyện các mô hình dự báo sử dụng XGBoost và Seasonal Naive.
   5. **Scaling simulation:** Mô phỏng các chính sách autoscaling và tính toán các chỉ số hiệu suất (chi phí, SLA vi phạm, v.v.).
   6. **API Deployment:** Cung cấp API cho các dự báo và điều chỉnh tài nguyên.
-  7. **Demo UI:** Demo bằng dasboard xây dựng bằng Streamlit với biểu đồ tải, dự báo, đề xuất scale events.
+  7. **Demo UI:** Dasboard xây dựng dựa trên Streamlit với biểu đồ tải, dự báo, đề xuất scale events.
   
   **Tổng quan luồng công việc:**
 
