@@ -46,13 +46,13 @@
        ↓
   INGEST & PARSE
        ↓
-  TIME SERIES AGGREGATION (1m / 5m / 15m)
+  TIME SERIES AGGREGATION 
        ↓
   FEATURE ENGINEERING
        ↓
-  FORECAST MODEL (XGBoost)
+  FORECAST MODEL 
        ↓
-  LOAD FORECAST (future horizon)
+  LOAD FORECAST 
        ↓
   SCALING POLICY ENGINE
        ↓
@@ -83,6 +83,7 @@ Mô hình hồi quy cây quyết định, sử dụng để dự báo tải củ
 3. Rolling-window Validation: Thực hiện kiểm tra mô hình theo cửa sổ trượt để mô phỏng tình huống thực tế khi hệ thống phải dự báo theo từng thời điểm.
 
 ### Cấu trúc thư mục
+```plain text
 autoscaling-analysis/
 ├─ README.md
 ├─ LICENSE
