@@ -199,12 +199,12 @@ autoscaling-analysis/
 ### Hướng dẫn chạy:
 Để chạy dự án, cần cài đặt các phụ thuộc và môi trường như sau:
 
-# Tạo môi trường ảo Python tên là .venv
+### Tạo môi trường ảo Python tên là .venv
 ```bash
 python -m venv .venv
 ```
 
-# Kích hoạt môi trường ảo
+### Kích hoạt môi trường ảo
 ```bash 
 .\.venv\Scripts\Activate.ps1
 
@@ -212,20 +212,20 @@ python -m venv .venv
 ```bash 
 python -m pip install --upgrade pip
 ```
-# Cài đặt toàn bộ thư viện cần thiết từ file requirements.txt
+### Cài đặt toàn bộ thư viện cần thiết từ file requirements.txt
 ```bash 
 pip install -r requirements.txt
 ```
-# Thiết lập biến môi trường để Python nhận diện thư mục src là root module
+### Thiết lập biến môi trường để Python nhận diện thư mục src là root module
 ```bash 
 $env:PYTHONPATH="src"
 $env:AUTOSCALING_CONFIG="configs/config.yaml"
 ```
-# Chạy toàn bộ pipeline thông qua CLI (từ preprocess → train → benchmark → simulate...)
+### Chạy toàn bộ pipeline thông qua CLI (từ preprocess → train → benchmark → simulate...)
 ```bash 
 python -m autoscaling_analysis.cli --config configs/config.yaml all
 ```
-# Chạy riêng lẻ
+### -------------Chạy riêng lẻ-----------------------
 # 1. Tiền xử lý dữ liệu (clean, chuẩn hóa, chia tập...)
 ```bash 
 python scripts\preprocess.py --config configs/config.yaml
