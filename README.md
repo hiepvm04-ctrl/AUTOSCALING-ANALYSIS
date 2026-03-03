@@ -226,29 +226,29 @@ $env:AUTOSCALING_CONFIG="configs/config.yaml"
 python -m autoscaling_analysis.cli --config configs/config.yaml all
 ```
 ### -------------Chạy riêng lẻ-----------------------
-# 1. Tiền xử lý dữ liệu (clean, chuẩn hóa, chia tập...)
+### 1. Tiền xử lý dữ liệu (clean, chuẩn hóa, chia tập...)
 ```bash 
 python scripts\preprocess.py --config configs/config.yaml
 ```
-# 2. Tạo feature cho mô hình
+### 2. Tạo feature cho mô hình
 ```bash 
 python scripts\features.py --config configs/config.yaml
 ```
-# 3. Huấn luyện mô hình
+### 3. Huấn luyện mô hình
 ```bash 
 python scripts\train.py --config configs/config.yaml
 ```
-# 4. Đánh giá hiệu năng mô hình trên tập test
+### 4. Đánh giá hiệu năng mô hình trên tập test
 ```bash 
 python scripts\benchmark.py --config configs/config.yaml --split test
 ```
-# 5. Mô phỏng autoscaling dựa trên metric "hits"
-# --window 5m: cửa sổ thời gian 5 phút
-# --model xgb: sử dụng model XGBoost
+### 5. Mô phỏng autoscaling dựa trên metric "hits"
+### --window 5m: cửa sổ thời gian 5 phút
+### --model xgb: sử dụng model XGBoost
 ```bash 
 python scripts\simulate_scaling.py --config configs/config.yaml --metric hits --window 5m --model xgb
 ```
-# Khởi động Streamlit UI để xem dashboard trực quan
+### Khởi động Streamlit UI để xem dashboard trực quan
 ```bash 
 streamlit run src\autoscaling_analysis\ui\streamlit_app.py
 ```
