@@ -199,26 +199,59 @@ autoscaling-analysis/
 ### Hướng dẫn chạy:
 Để chạy dự án, cần cài đặt các phụ thuộc và môi trường như sau:
 
-1. **Tạo môi trường ảo** và cài đặt các thư viện yêu cầu:
-   ```bash
-   python -m venv .venv && source .venv/bin/activate
-   pip install -r requirements.txt
+# Tạo môi trường ảo Python tên là .venv
+```bash
+python -m venv .venv
+```
 
-2. **Huấn luyện mô hình**:
-    Để huấn luyện các mô hình dự báo (XGBoost, Seasonal Naive, v.v.) từ dữ liệu đã tiền xử lý, sử dụng câu lệnh sau:
-    ```bash
-    python scripts/train.py --config configs/train.yaml
+# Kích hoạt môi trường ảo
+```bash 
+.\.venv\Scripts\Activate.ps1
 
-3. Chạy mô phỏng autoscaling:
-    Để mô phỏng các chính sách autoscaling và tính toán các chỉ số hiệu suất, sử dụng câu lệnh sau:
-    ```bash
-    python scripts/simulate_scaling.py
-4. Demo UI:
-    Xem demo ứng dụng UI với Streamlit bằng cách chạy:
-    ```bash
-    sh scripts/run_ui.sh
-    Sau khi chạy lệnh trên, truy cập vào ứng dụng UI qua đường dẫn http://localhost:8501 để xem các dự báo và mô phỏng autoscaling trực quan.
-
+# Nâng cấp pip lên phiên bản mới nhất (tránh lỗi cài package)
+```bash 
+python -m pip install --upgrade pip
+```
+# Cài đặt toàn bộ thư viện cần thiết từ file requirements.txt
+```bash 
+pip install -r requirements.txt
+```
+# Thiết lập biến môi trường để Python nhận diện thư mục src là root module
+```bash 
+$env:PYTHONPATH="src"
+$env:AUTOSCALING_CONFIG="configs/config.yaml"
+```
+# Chạy toàn bộ pipeline thông qua CLI (từ preprocess → train → benchmark → simulate...)
+```bash 
+python -m autoscaling_analysis.cli --config configs/config.yaml all
+```
+# Chạy riêng lẻ
+# 1. Tiền xử lý dữ liệu (clean, chuẩn hóa, chia tập...)
+```bash 
+python scripts\preprocess.py --config configs/config.yaml
+```
+# 2. Tạo feature cho mô hình
+```bash 
+python scripts\features.py --config configs/config.yaml
+```
+# 3. Huấn luyện mô hình
+```bash 
+python scripts\train.py --config configs/config.yaml
+```
+# 4. Đánh giá hiệu năng mô hình trên tập test
+```bash 
+python scripts\benchmark.py --config configs/config.yaml --split test
+```
+# 5. Mô phỏng autoscaling dựa trên metric "hits"
+# --window 5m: cửa sổ thời gian 5 phút
+# --model xgb: sử dụng model XGBoost
+```bash 
+python scripts\simulate_scaling.py --config configs/config.yaml --metric hits --window 5m --model xgb
+```
+# Khởi động Streamlit UI để xem dashboard trực quan
+```bash 
+streamlit run src\autoscaling_analysis\ui\streamlit_app.py
+```
 ## 6. Giới hạn & Hướng phát triển
 
 - **Giới hạn hiện tại:**
