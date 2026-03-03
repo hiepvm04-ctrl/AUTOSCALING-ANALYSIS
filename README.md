@@ -207,7 +207,7 @@ python -m venv .venv
 ### Kích hoạt môi trường ảo
 ```bash 
 .\.venv\Scripts\Activate.ps1
-
+```
 # Nâng cấp pip lên phiên bản mới nhất (tránh lỗi cài package)
 ```bash 
 python -m pip install --upgrade pip
@@ -243,8 +243,6 @@ python scripts\train.py --config configs/config.yaml
 python scripts\benchmark.py --config configs/config.yaml --split test
 ```
 ### 5. Mô phỏng autoscaling dựa trên metric "hits"
-### --window 5m: cửa sổ thời gian 5 phút
-### --model xgb: sử dụng model XGBoost
 ```bash 
 python scripts\simulate_scaling.py --config configs/config.yaml --metric hits --window 5m --model xgb
 ```
